@@ -3,8 +3,6 @@
 import sys
 import os
 
-picdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pics')
-fontdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fonts')
 libdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'libs')
 if os.path.exists(libdir):
     sys.path.append(libdir)
@@ -20,7 +18,6 @@ import requests
 from PIL import Image,ImageDraw,ImageFont,ImageEnhance
 import traceback
 
-logging.basicConfig(level=logging.DEBUG)
 def get_day_left():
     target_date = datetime.datetime(year=2024, month=10, day=23, hour=0)
     diff = target_date - datetime.datetime.now()
@@ -61,14 +58,15 @@ def get_today_forecast():
         return False
 
 try:
+    logging.basicConfig(level=logging.DEBUG)
     logging.info('start drawing on epd7in3f')
 
-    epd = epd7in3f.EPD()
-    logging.info('init and Clear')
-    epd.init()
-    epd.Clear()
-
     # setup
+    ## get dir
+    picdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'assets/pics')
+    fontdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'assets/fonts')
+    icondir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'assets/icons')
+    ## setup fonts
     font16 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Regular.ttf'), 16)
     font20 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 20)
     font28 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 28)
@@ -77,6 +75,11 @@ try:
     font68 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 68)
     font80 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 80)
     font100 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 100)
+
+    epd = epd7in3f.EPD()
+    logging.info('init and Clear')
+    epd.init()
+    epd.Clear()
 
     # create base image
     logging.info('start to create image')
@@ -105,11 +108,11 @@ try:
     ## wright weather info if get from weather api
     result = get_today_forecast()
     if result != False:
-        weather_image = Image.open(os.path.join(picdir, f'weather/sunny@2x.png')); 
-        cover.paste(weather_image, (60, 192))
+        weather_image = Image.open(os.path.join(icondir, f'weather/{result["condition"]["code"]}.jpg'))
+        cover.paste(resize_image(weather_image, 32), (60, 192))
         draw.text((94,196), f'{result["maxtemp_c"]}/{result["mintemp_c"]}℃', font=font16, fill = epd.BLACK)
-        pop_image = Image.open(os.path.join(picdir, f'weather/humidity@2x.png')); 
-        cover.paste(pop_image, (196, 192))
+        humidity_image = Image.open(os.path.join(icondir, f'humidity.png'))
+        cover.paste(resize_image(humidity_image, 20), (202, 198))
         draw.text((230,196), f'{result["avghumidity"]:02}%', font = font16, fill = epd.BLACK)
 
     draw.text((50, 296), '洗足学園小学校', font = font32, fill = epd.BLACK)
