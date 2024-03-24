@@ -71,6 +71,7 @@ try:
     # setup
     ## setup fonts
     font8 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 8)
+    font10 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 10)
     font16 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Regular.ttf'), 16)
     font20 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 20)
     font28 = ImageFont.truetype(os.path.join(fontdir, 'Noto_Sans_JP/NotoSansJP-Bold.ttf'), 28)
@@ -90,23 +91,21 @@ try:
     background = Image.new('RGB', (epd.width, epd.height), epd.WHITE)  # 255: clear the frame
 
     # paste left side
+    left_side = Image.new('RGB', (480, 480), epd.WHITE)  # 255: clear the frame
     i = random.randrange(58) + 1
     original_image = Image.open(os.path.join(picdir, f'picts.{i}.jpg'))
     resized_image = resize_image(original_image, 480)
     enhanced_image = enhance_image(resized_image)
     pos_left = round((480 - enhanced_image.width) / 2)
     pos_top = round((480 - enhanced_image.height) / 2)
-    background.paste(enhanced_image, (pos_left, pos_top))
+    left_side.paste(enhanced_image, (pos_left, pos_top))
 
     ## write art info
     art_info = get_art_info()
     info_text = f'{art_info[str(i)]["title"]} | {art_info[str(i)]["artist"]}';
-    iw, ih = ImageDraw.Draw(background).textsize(info_text, font8)
-
-    info_bg = Image.new('RGB', (iw + 8, ih + 4), 0xAAAAAA)
-    write = ImageDraw.Draw(info_bg)
-    write.text((4, 2), info_text, font = font8, fill = epd.BLACK)
-    background.paste(info_bg, (0, 480 - (ih + 4)))
+    write = ImageDraw.Draw(left_side)
+    write.text((4, 466), info_text, font = font10, fill = epd.WHITE)
+    background.paste(left_side, (0, 0))
 
     # create right side
     cover = Image.new('RGB', (320, 480), epd.WHITE)

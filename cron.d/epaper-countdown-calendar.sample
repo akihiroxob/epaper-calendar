@@ -1,0 +1,1 @@
+0 0-23/3 * * * root WEATHER_APPID=__APP_ID__ /usr/bin/python3 __PATH_TO_MAIN__
